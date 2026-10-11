@@ -9,7 +9,17 @@
 - 混入文件读取/修改、重定向、管道、后台执行、变量替换、递归/跟随链接、未知参数与目标变更均未获得目录适配放行。
 - 打包插件通过官方 CLI 的真实文件写入、保护路径拦截与三进程恢复检查。恢复测试的 Bash 工具主体与审批传输仍为受控夹具。
 
-可复验 `npm run verify`，再对 `dist/finneas-dsh-safe-review-0.3.3.tgz` 运行下文两个 smoke 脚本。实际 Desktop 升级与人工界面验收结果记录在该版本 Release 说明；账户数据及原始会话证据仅保存于本机。
+可复验 `npm run verify`，再对 `dist/finneas-dsh-safe-review-0.3.3.tgz` 运行下文两个 smoke 脚本。账户数据及原始会话证据仅保存于本机。
+
+## 0.3.3 发布后桌面实测
+
+日期 2026-10-11，DSH Desktop 0.2.0-rc.2、tiered 模式，发布（含 GitHub v0.3.3）之后的实机会话证据：
+
+- `/safe-review` 状态核对通过：版本 0.3.3、模式 tiered（Astra → Terra → Luna）、tier free-primary / quota ready、付费预算 $1.0000 未动、原生 UI 审批通道 verified。
+- 四条决定路径均有实录：**自动**（裸 `ls -la` 无弹窗执行，目录适配生效；更早同日 `printf` 探针 ×3 经审核器无弹窗）、**人工允许一次**（读合成敏感文件、含管道/展开/工作区外读取的排查命令）、**人工拒绝**（同一敏感文件二次读，用户拒绝后调用被拒）、**直接拒绝**（写 `.codex/` 被拒且文件未创建；danger-full-access 预设下四个调用全部 fail-closed 拒绝）。
+- 修正此前 Release 说明的一处表述：14:10–14:17 排查窗口内**没有**任何自动放行——该窗口起始于 danger-full-access（全部拒绝），随后带管道/保护目标的列举命令均逐次人工确认；期间原生 `glob` 调用亦被 full-access 拒绝。发布后真正的目录适配自动放行实例是 15:16 的裸 `ls -la`。
+- 审核账本：当日 8 笔已结算审核全部落在 free-primary（gpt-6-astra，每笔约 550–850 输入 / 37–49 输出 tokens），high 池用量 20,208/250,000，付费预算未动。
+- 原生 `glob`/`grep`/`todo_write`/`web_search` 调用必转人工：`src/vendor/policy.ts` 的 `assessTool` 白名单未被 gate 调用（运行时仅 import `hardDenyReason`），资格地板对它们落到兜底行。逐条判定链与证据时间戳见 [逐条判定表](DECISION_TABLE.md)。
 
 ## 公开版 0.3.2
 
