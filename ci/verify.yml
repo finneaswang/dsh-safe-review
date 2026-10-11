@@ -1,0 +1,33 @@
+name: Verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.20.0'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check:publication
+      - run: npm run verify
+      - name: Build package and validate it in isolated DSH homes
+        run: |
+          mkdir -p dist
+          npm pack --ignore-scripts --pack-destination dist
+          node scripts/check-publication.mjs --package dist/finneas-dsh-safe-review-0.3.2.tgz
+          node scripts/product-smoke.mjs dist/finneas-dsh-safe-review-0.3.2.tgz
+          node scripts/restart-smoke.mjs dist/finneas-dsh-safe-review-0.3.2.tgz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dsh-safe-review-package
+          path: dist/*.tgz
+          if-no-files-found: error

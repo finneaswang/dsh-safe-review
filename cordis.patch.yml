@@ -1,0 +1,4 @@
+- insert:
+    - id: finneas-safe-review
+      name: '@finneas/dsh-safe-review'
+      config: {}

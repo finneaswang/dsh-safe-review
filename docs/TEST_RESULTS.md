@@ -1,0 +1,41 @@
+# 验证范围
+
+## 公开版 0.3.2
+
+公开版由已验收的 0.3.1 整理而来，保留审批、预算和用量实现。新增仓库文档、发布检查、自动构建；评估和 CLI smoke 输出统一放入忽略的 `.local/`。用于测试的凭据全部为合成值。
+
+可复现命令：
+
+```sh
+npm ci --ignore-scripts
+npm run verify
+npm run check:publication
+mkdir -p dist
+npm pack --ignore-scripts --pack-destination dist
+node scripts/product-smoke.mjs dist/finneas-dsh-safe-review-0.3.2.tgz
+node scripts/restart-smoke.mjs dist/finneas-dsh-safe-review-0.3.2.tgz
+```
+
+本机已对公开版 0.3.2 重新执行上述检查：类型检查、构建和 **492/492 测试（19 个文件）**通过；打包后的真实文件写入、保护路径拦截、沙箱保持及三个独立 CLI 进程的恢复检查通过。该记录没有声称 0.3.2 已替换或升级开发机的 Desktop 安装。
+
+仓库提供 GitHub Actions 模板，可执行类型检查、构建、测试、打包及独立 CLI 重启验证。当前 GitHub 登录缺少 workflow 写入权限，模板放在 `ci/`，尚未启用；目前通过记录来自本机执行，不能声称云端 Actions 已运行。启用步骤见 [自动构建说明](CI.md)。CI 无需用户 API Key，也不调用真实模型。构建通过不是新平台的 Desktop 窗口验收。
+
+## 0.3.1 开发机验收基线
+
+日期 2026-10-11，macOS Apple Silicon、DSH Desktop 0.2.0-rc.2、Cordis 4.0.4。
+
+- 类型检查、构建、492/492 测试通过，19 个测试文件。
+- 打包插件在真实官方 CLI 中完成普通文件写入、受保护写入拒绝、三次独立进程重启验证。
+- Desktop 的 Astra 和受控切档 Terra 请求自动批准打印；受控切档 Luna 请求转人工，允许一次后完成打印。
+- 合成敏感文件的“允许一次”和“拒绝”结果符合决定；先前允许未被后续调用复用。
+- `.codex/` 测试写入直接拒绝，文件没有创建。
+- 真实 Admin 用量查询、三档卡片及模拟超出本地付费预算的 Toast 已观察到。
+- 完整退出重启后插件正常加载、正式额度和用量保留、会话仍为工作区权限与 ask 审批。
+
+两个切档短提示没有分别捕获，Toast 的“查看用量”按钮动作也未逐项验证。第二、第三档使用独立测试账本和临时阈值，不代表真实免费额度自然耗尽。
+
+原始本机日志、账户用量、会话记录、备份和配置留在开发机，不随公开源码上传。上述内容是历史人工验收记录；他人应在自己的测试工作区复验。
+
+## 限制
+
+合成模型样本不证明总体识别准确率。Browser、Computer Use 和所有 MCP 外部副作用没有逐一实测。自动化夹具不能替代原生窗口和人类点击的证据。同进程恶意 Node 插件仍在宿主信任边界内。
