@@ -9,7 +9,7 @@
 从 GitHub Release 下载 `.tgz` 并核对随包的 `SHA256SUMS.txt`，通过 DSH 官方插件入口安装。也可以在项目目录运行：
 
 ```sh
-dsh plugin --profile desktop add "$PWD/dist/finneas-dsh-safe-review-0.3.2.tgz" --ignore-scripts
+dsh plugin --profile desktop add "$PWD/dist/finneas-dsh-safe-review-0.3.3.tgz" --ignore-scripts
 ```
 
 如果命令提示 pnpm store 不一致，使用提示中原有 store 路径作为 `--store-dir`；不要为此重新配置全局 store。
@@ -45,6 +45,6 @@ dsh plugin --profile desktop add "$PWD/dist/finneas-dsh-safe-review-0.3.2.tgz" -
 
 ## 升级、回退
 
-本仓库 0.3.2 整理了 0.3.1 的发布工程，未改变审批策略；本机旧安装不会因 GitHub 发布而自动升级。升级后仍须自行验证实际 Desktop 行为。
+0.3.3 将可完整识别的非递归目录查看交给正常自动审核，包括 `ls -la ~/.dsh/` 及静态 `echo` 标题。三档模式仍核对用户指令，审核服务或用量不可用时仍转人工。读取文件内容、递归扫描、动态命令和配置写入沿用原规则。GitHub 发布不会自动升级本机；安装后需完整退出重启并复验。
 
 回退前另存当前配置与账本，通过官方入口安装保留的旧 `.tgz` 并恢复对应插件配置，重启后检查权限和审批。0.3 会导入旧 `daily-budget.json` 当日用量；0.2 不会反向读取 `tier-budget.json` 的新增消费。因此保留两代账本并核对当天用量，不通过删除账本清零。

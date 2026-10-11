@@ -4,13 +4,14 @@
 
 An independent approval-review plugin for DeepSeek Harness Desktop. Deterministic checks and a one-use execution guard constrain model decisions; sensitive and uncertain actions use the native human approval window.
 
-**兼容目标：DSH Desktop 0.2.0-rc.2、Cordis 4.0.4、macOS Apple Silicon。** 这是独立社区项目。当前仓库版本 **0.3.2**，从已在开发机验收的 0.3.1 整理而来；版本差异见 [变更记录](CHANGELOG.md)。
+**兼容目标：DSH Desktop 0.2.0-rc.2、Cordis 4.0.4、macOS Apple Silicon。** 这是独立社区项目。当前仓库版本 **0.3.3**，加入纯目录查看适配；版本差异见 [变更记录](CHANGELOG.md)。
 
 ## 审批行为
 
 | 操作 | 处理 |
 |---|---|
 | 普通工作区文件、可以完整分析的简单终端操作 | 规则或独立模型审核，低风险可自动批准 |
+| 非递归 `ls` 目录查看（包括 `~/.dsh/`，可附静态 `echo` 标题） | 识别为低风险；独立模型结合用户指令审核后可自动批准 |
 | 敏感目标、删除、外部写入、扩权、不透明脚本 | 原生窗口逐次确认 |
 | 明确系统破坏、凭据外传、修改审批或关键配置 | 拒绝 |
 | 模型、网络、用量或预算不可用；风险不明确 | 转人工，未确认不执行 |
@@ -47,8 +48,8 @@ npm pack --ignore-scripts --pack-destination dist
 ```sh
 npm run verify
 npm run check:publication
-node scripts/product-smoke.mjs dist/finneas-dsh-safe-review-0.3.2.tgz
-node scripts/restart-smoke.mjs dist/finneas-dsh-safe-review-0.3.2.tgz
+node scripts/product-smoke.mjs dist/finneas-dsh-safe-review-0.3.3.tgz
+node scripts/restart-smoke.mjs dist/finneas-dsh-safe-review-0.3.3.tgz
 ```
 
 自动化检查使用合成数据，不读取用户密钥或调用真实模型。显式运行 `scripts/live-review-eval.mjs` 才会调用真实 API、产生可能的费用；它只审核合成案例，不执行案例中的工具。已验证内容和未验证范围见 [验证记录](docs/TEST_RESULTS.md)。

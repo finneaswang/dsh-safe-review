@@ -130,6 +130,53 @@ function evidence(init: RequestInit | undefined) {
 }
 
 describe('independent reviewer inside the real DSH gate and native approval pipeline', () => {
+  it('automatically admits protected directory metadata after contextual review', async () => {
+    const h = await setup()
+    mkdirSync(join(h.cwd, '.dsh/profiles/desktop'), { recursive: true })
+    const command = 'ls -la .dsh/; echo "=== profiles ==="; ls -la .dsh/profiles/; echo "=== desktop ==="; ls -la .dsh/profiles/desktop/'
+    expect((await h.run('bash', { command })).isError).toBe(false)
+    expect(h.requests).toHaveLength(0)
+    expect(h.fetchMock).toHaveBeenCalledTimes(1)
+    expect(evidence(h.fetchMock.mock.calls[0]![1]).policyReason).toMatch(/metadata only/)
+    expect(h.bodies).toEqual([{ name: 'bash', arguments: { command } }])
+  })
+
+  it.each(['ask', 'deny'] as const)('honors contextual %s for directory listings', async decision => {
+    const h = await setup({ outcome: 'rejected', human: 'Do not inspect reviewer-state.', fetch: async (_url, init) => {
+      expect(evidence(init).trustedUserMessages[0].text).toBe('Do not inspect reviewer-state.')
+      return response(decision, decision === 'ask' ? 'unknown' : 'high')
+    } })
+    expect((await h.run('bash', { command: 'ls -la reviewer-state' })).isError).toBe(true)
+    expect(h.fetchMock).toHaveBeenCalledTimes(1)
+    expect(h.requests).toHaveLength(decision === 'ask' ? 1 : 0)
+    expect(h.bodies).toHaveLength(0)
+  })
+
+  it('keeps listing approval subject to host policy and available reviewer', async () => {
+    const h = await setup({ outcome: 'rejected', noKey: true })
+    expect((await h.run('bash', { command: 'ls -la reviewer-state' })).isError).toBe(true)
+    expect(h.requests).toHaveLength(1)
+    expect(h.bodies).toHaveLength(0)
+    h.ctx.on('tools/pre-execute', async () => ({ kind: 'ask', reason: 'Host restriction.' }))
+    expect((await h.run('bash', { command: 'ls -la reviewer-state' })).isError).toBe(true)
+    expect(h.requests).toHaveLength(2)
+    expect(h.fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('rechecks directory identity after a model has approved the listing', async () => {
+    const h = await setup()
+    h.ctx.on('tools/pre-execute', async (_exec, next) => {
+      const decision = await next()
+      rmSync(join(h.cwd, '.dsh'), { recursive: true })
+      writeFileSync(join(h.cwd, '.dsh'), 'changed target')
+      return decision
+    }, { prepend: true })
+    mkdirSync(join(h.cwd, '.dsh'))
+    expect((await h.run('bash', { command: 'ls -la .dsh' })).isError).toBe(true)
+    expect(h.fetchMock).toHaveBeenCalledTimes(1)
+    expect(h.bodies).toHaveLength(0)
+  })
+
   it.each([
     ['read', { file_path: 'note.txt' }],
     ['write', { file_path: 'new.txt', content: 'An ordinary project note.' }],
@@ -403,6 +450,14 @@ describe('three-tier model routing inside the official DSH execution pipeline', 
     quotaFixture.value = { version:1, day:new Date().toISOString().slice(0,10), fetchedAt:Date.now(),
       primaryUsed:0, secondaryUsed:0, unmappedTokens:0, todayUsd:0, monthUsd:0, costsFetchedAt:Date.now() }
   }
+  it('automatically reviews directory metadata in the installed three-tier mode', async () => {
+    quota()
+    const h = await setup({ config: { reviewerMode: 'tiered' } })
+    expect((await h.run('bash', { command: 'ls -la reviewer-state; echo "=== workspace ==="; ls -lah .' })).isError).toBe(false)
+    expect(h.requests).toHaveLength(0)
+    expect(h.fetchMock).toHaveBeenCalledTimes(1)
+    expect(h.bodies).toHaveLength(1)
+  })
   it.each([
     [250_000,2_500_000,'gpt-6-astra'], [0,2_500_000,'gpt-5.6-terra'], [0,0,'gpt-6-luna'],
   ])('selects the correct model at primary=%s secondary=%s', async (primary,secondary,model) => {

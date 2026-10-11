@@ -8,7 +8,7 @@ const project = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const tarball = resolve(process.argv[2] ?? '')
 if (!process.argv[2] || !existsSync(tarball)) throw new Error('Pass an existing packed plugin .tgz.')
 const installed = process.argv[3] === '--installed'
-const base = resolve(project, installed ? '.local/installed-smoke-0.3.2' : '.local/packed-smoke-0.3.2')
+const base = resolve(project, installed ? '.local/installed-smoke-0.3.3' : '.local/packed-smoke-0.3.3')
 mkdirSync(base, { recursive: true })
 if (!installed) {
 const extracted = join(base, 'unpacked'); mkdirSync(extracted, { recursive: true })
@@ -21,12 +21,12 @@ symlinkSync(join(extracted, 'package'), link)
 const packageModules = join(extracted, 'package/node_modules')
 if (!existsSync(packageModules)) symlinkSync(join(project, 'node_modules'), packageModules)
 }
-const home = installed ? resolve(project, '.local/install-smoke-home-0.3.2') : join(base, 'dsh-home')
+const home = installed ? resolve(project, '.local/install-smoke-home-0.3.3') : join(base, 'dsh-home')
 const profileName = installed ? 'install-smoke' : 'safe-review-smoke'
 const profile = join(home, 'profiles', profileName); mkdirSync(profile, { recursive: true })
 if (!installed && !existsSync(join(profile, 'node_modules'))) symlinkSync(join(project, 'node_modules'), join(profile, 'node_modules'))
 const core = ['session', 'session-projection', 'system-prompt', 'tools', 'user-approval', 'sandbox-policy', 'fs-sandbox', 'tool-fs']
-writeFileSync(join(profile, 'package.json'), JSON.stringify({ name: 'isolated-safe-review-smoke', private: true, type: 'module', dependencies: Object.fromEntries([...core.map(x => [`@deepseek-ai/dsh-${x}`, '0.2.0-rc.2']), ['@finneas/dsh-safe-review', '0.3.2']]), dsh: { profile: { bundles: ['@finneas/dsh-safe-review'] } } }, null, 2))
+writeFileSync(join(profile, 'package.json'), JSON.stringify({ name: 'isolated-safe-review-smoke', private: true, type: 'module', dependencies: Object.fromEntries([...core.map(x => [`@deepseek-ai/dsh-${x}`, '0.2.0-rc.2']), ['@finneas/dsh-safe-review', '0.3.3']]), dsh: { profile: { bundles: ['@finneas/dsh-safe-review'] } } }, null, 2))
 const cwd = join(base, 'workspace'); mkdirSync(cwd, { recursive: true })
 const configs = { 'user-approval': { policy: 'ask' }, 'sandbox-policy': { mode: 'workspace-write', workspaceRoot: cwd }, 'fs-sandbox': { cwd } }
 writeFileSync(join(profile, 'cordis.patch.yml'), JSON.stringify([{ insert: [

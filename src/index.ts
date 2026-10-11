@@ -259,10 +259,10 @@ export function apply(ctx: Context, config: Config = {}): void {
           try { const b = await tiered.snapshot(); usage = ` Tier: ${b.activeTier}; quota: ${b.status}. ` + b.tiers.map(t => `${t.model}: ${t.localUsedTokens} local tokens; estimated free remaining ${t.allowance?.remainingTokens ?? 'n/a'}`).join('; ') + `; paid local budget remaining $${b.paidBudget?.remainingUsd.toFixed(4)}; account balance: unknown (billing page).` }
           catch { usage = ' Tier accounting unavailable; automatic requests require human confirmation.' }
         }
-        return { kind: 'success', text: `Safe Review 0.3.2 active; DSH 0.2.0-rc.2. Mode: ${mode}${reviewer ? ` (${tiered ? 'Astra → Terra → Luna' : model})` : ''}. Auto: ${counts.auto}; model: ${counts.model}; human: ${counts.human}; denied: ${counts.denied}; fallback: ${counts.fallback}.${usage} ${lastReview} ${humanChannelProblem(ctx) ?? 'Native UI approval channel verified.'}` }
+        return { kind: 'success', text: `Safe Review 0.3.3 active; DSH 0.2.0-rc.2. Mode: ${mode}${reviewer ? ` (${tiered ? 'Astra → Terra → Luna' : model})` : ''}. Auto: ${counts.auto}; model: ${counts.model}; human: ${counts.human}; denied: ${counts.denied}; fallback: ${counts.fallback}.${usage} ${lastReview} ${humanChannelProblem(ctx) ?? 'Native UI approval channel verified.'}` }
       },
     })
   })
-  ctx.provide('safeReviewStatus', Object.freeze({ version: '0.3.2', automatic: reviewer ? `contextual ${tiered ? 'three-tier' : model} review inside workspace sandbox` : 'verified ordinary workspace file operations' }))
+  ctx.provide('safeReviewStatus', Object.freeze({ version: '0.3.3', automatic: reviewer ? `contextual ${tiered ? 'three-tier' : model} review inside workspace sandbox` : 'verified ordinary workspace file operations' }))
   ctx.effect(() => () => { active = false; stopping.abort(); admitted.clear() })
 }

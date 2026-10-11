@@ -16,7 +16,7 @@ async function run(ctx) {
     const agent = { session, id: session.id, ctx }
     let seq = 0
     const execute = (name, args) => ctx.tools.execute({ name, arguments: args, callId: ToolCallId(`packed-${seq++}`), agent, signal: new AbortController().signal })
-    assert.equal(ctx.safeReviewStatus.version, '0.3.2')
+    assert.equal(ctx.safeReviewStatus.version, '0.3.3')
     const ordinary = await execute('write', { file_path: 'packed-output.txt', content: 'packed artifact loaded' })
     assert.equal(ordinary.isError, false, JSON.stringify(ordinary))
     assert.equal(readFileSync(join(cwd, 'packed-output.txt'), 'utf8'), 'packed artifact loaded')

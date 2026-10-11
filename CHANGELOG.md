@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3 — 2026-10-11
+
+- Recognize static, non-recursive directory listings, including protected directories, literal home paths and echo headings, as metadata-only operations eligible for contextual automatic review.
+- Keep user-context checks, host policy vetoes, final execution guards, and human fallback when the independent reviewer is unavailable.
+- Add regression coverage for mixed commands, shell expansion, redirection, recursive options, invalid tool arguments and target changes during approval.
+
 ## 0.3.2 — 2026-10-11
 
 - Prepare a standalone GitHub project with installation, demonstration, contribution, and security documentation.

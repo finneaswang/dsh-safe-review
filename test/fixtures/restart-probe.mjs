@@ -60,7 +60,7 @@ async function run(ctx) {
       for (let n = 0; n < 200 && !waiters.length; n++) await new Promise(r => setTimeout(r, 5))
       assert.equal(waiters.length, 1, 'The call must wait at the approval queue.')
     }
-    assert.equal(ctx.safeReviewStatus.version, '0.3.2')
+    assert.equal(ctx.safeReviewStatus.version, '0.3.3')
     if (phase < 3) {
       assert.equal(ctx.sandboxPolicy.resolve({ session }).mode, 'workspace-write')
       assert.equal(ctx.approval.overrideOf(session), 'ask')

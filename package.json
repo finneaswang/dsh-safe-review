@@ -1,6 +1,6 @@
 {
   "name": "@finneas/dsh-safe-review",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "type": "module",
   "description": "Quota-aware three-tier independent approval reviewer for DSH Desktop 0.2.0-rc.2",
   "license": "MIT",

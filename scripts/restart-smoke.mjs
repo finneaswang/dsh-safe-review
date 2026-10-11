@@ -20,7 +20,7 @@ for (const path of ['lib/index.js', 'lib/policy.js', 'lib/reviewer.js']) {
 }
 const core = ['session', 'session-projection', 'system-prompt', 'tools', 'user-approval', 'sandbox-policy']
 writeFileSync(join(profile, 'package.json'), JSON.stringify({ name: 'isolated-restart-test', private: true,
-  dependencies: Object.fromEntries([...core.map(x => [`@deepseek-ai/dsh-${x}`, '0.2.0-rc.2']), ['@finneas/dsh-safe-review', '0.3.2']]),
+  dependencies: Object.fromEntries([...core.map(x => [`@deepseek-ai/dsh-${x}`, '0.2.0-rc.2']), ['@finneas/dsh-safe-review', '0.3.3']]),
   dsh: { profile: { bundles: ['@finneas/dsh-safe-review'] } } }))
 const configs = { 'user-approval': { policy: 'ask' }, 'sandbox-policy': { mode: 'workspace-write', workspaceRoot: cwd } }
 writeFileSync(join(profile, 'cordis.patch.yml'), JSON.stringify([{ insert: [

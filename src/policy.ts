@@ -5,6 +5,7 @@ import type { ToolExecution } from '@deepseek-ai/dsh-tools'
 import { hardDenyReason } from './vendor/policy.js'
 import { isWithin, normalizePath, resolveRoots } from './vendor/paths.js'
 import { decomposeCommandLine, type ShellKind } from './vendor/shell.js'
+import { isDirectoryListing } from './directory-listing.js'
 
 export type Risk = 'low' | 'sensitive' | 'high' | 'unknown'
 export interface Assessment { risk: Risk; reason: string }
@@ -137,6 +138,7 @@ export function assess(exec: Readonly<ToolExecution>, options: PolicyOptions): A
   if (SECRET_TEXT.test(serialized)) return result(['read', 'write', 'edit'].includes(exec.name) ? 'sensitive' : 'high', 'Potential secret material in an external or opaque action is blocked.')
   if (exec.name === 'bash' || exec.name === 'pwsh') {
     if (typeof args.command !== 'string') return result('unknown', 'Terminal input is incomplete or refers to a persistent process.')
+    if (isDirectoryListing(exec)) return result('low', 'Static non-recursive directory listing: names and metadata only; no file contents or changes.')
     const protectedShell = protectedShellAssessment(args.command, resolve(cwd, typeof args.workdir === 'string' ? args.workdir : '.'), exec.name, options)
     if (protectedShell) return protectedShell
     if (PROTECTED.test(args.command) && /\b(?:rm|mv|cp|tee|chmod|chown|sed|perl|python|node)\b|[>]/.test(args.command)) {

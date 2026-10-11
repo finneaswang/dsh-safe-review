@@ -6,12 +6,14 @@ import { isIP } from 'node:net'
 import { basename, dirname, isAbsolute, resolve } from 'node:path'
 import { isWithin } from './vendor/paths.js'
 import { decomposeCommandLine } from './vendor/shell.js'
+import { isDirectoryListing } from './directory-listing.js'
 
 export function modelEligibility(exec: Readonly<ToolExecution>, assessment: Assessment, options: PolicyOptions = { protectedRoots: [] }): string | undefined {
   if (assessment.risk === 'high' || assessment.risk === 'sensitive') return assessment.reason
   const args = exec.arguments as Record<string, unknown> | null
   if (!args || typeof args !== 'object' || Array.isArray(args)) return 'Complete structured arguments are required.'
   if (exec.agent?.session.header.origin === 'subagent') return 'Delegated execution requires parent review.'
+  if (isDirectoryListing(exec)) return undefined
   if (['read', 'write', 'edit'].includes(exec.name)) {
     return assessment.risk === 'low' ? undefined : 'Only verified ordinary file targets may receive model approval.'
   }
